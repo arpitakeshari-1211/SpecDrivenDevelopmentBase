@@ -1,92 +1,44 @@
-# Reports API
+# Vibe Coded Todo App
 
-A small FastAPI service that exposes a paginated `/reports` endpoint backed by a deterministic in-memory dataset.
+## What is Vibe Coding?
+Vibe coding means giving a casual prompt to an AI and accepting whatever it builds.
+No planning, no spec, no structure. Just prompt and ship!
 
-## Layout
+## What I Built
+Added a **Todo App** to the existing Reports API.
 
-```
-app/
-├── __init__.py
-├── data.py          # Seed dataset (120 rows, deterministic)
-├── models.py        # Pydantic models — internal vs public
-├── reports.py       # Filter / sort / pagination query layer
-├── todo_models.py   # Task Pydantic models
-├── todo_store.py    # In-memory task storage
-├── todo_routes.py   # TODO JSON API (/tasks)
-├── todo_ui.py       # Simple HTML homepage (/)
-└── main.py          # FastAPI app (reports + todos)
-```
+## Features
+Add a task
+List all tasks
+Mark task as completed
+Delete a task
 
-## Requirements
+## Endpoints
+| Method | Path | Description |
+|---|---|---|
+| POST | /tasks | Add a new task |
+| GET | /tasks | List all tasks |
+| PATCH | /tasks/{id}/complete | Mark task completed |
+| DELETE | /tasks/{id} | Delete a task |
 
-- Python 3.10+
-- pip
+## How I Built It
+1. Opened Cursor AI
+2. Typed a casual prompt describing what I wanted
+3. Accepted whatever Cursor generated
+4. Ran the app and it worked!
 
-## Setup
+## What Could Go Wrong with Vibe Coding
+No spec means no clear requirements
+AI might make unexpected decisions
+Hard to maintain or extend later
+No documentation of why things were built a certain way
 
-```bash
-git clone https://github.com/IITMBSMLOps/SpecDrivenDevelopmentBase.git
-cd SpecDrivenDevelopmentBase
+## Tech Stack
+Python
+FastAPI
+Pydantic
 
-python3 -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
-
-pip install -e .
-```
-
-## Run the API
-
+## Run
 ```bash
 uvicorn app.main:app --reload --port 8000
 ```
-
-Then open the TODO UI in your browser:
-
-**http://localhost:8000/**
-
-Or hit the API from another terminal:
-
-```bash
-curl "http://localhost:8000/health"
-curl "http://localhost:8000/reports?limit=3" | python -m json.tool
-```
-
-## Endpoints
-
-| Method | Path       | Description                                            |
-| ------ | ---------- | ------------------------------------------------------ |
-| GET    | `/health`  | Liveness probe — returns `{"status": "ok"}`.           |
-| GET    | `/reports` | Paginated list of reports with filtering and sorting.  |
-
-### TODO API (`/tasks`)
-
-In-memory todo list. Data is lost when the server restarts.
-
-| Method | Path                      | Description              |
-| ------ | ------------------------- | ------------------------ |
-| POST   | `/tasks`                  | Add a task (`{"title": "..."}`). |
-| GET    | `/tasks`                  | List all tasks.          |
-| DELETE | `/tasks/{task_id}`        | Delete a task by id.     |
-| PATCH  | `/tasks/{task_id}/complete` | Mark a task completed. |
-
-```bash
-curl -X POST http://localhost:8000/tasks -H "Content-Type: application/json" -d "{\"title\": \"Learn FastAPI\"}"
-curl http://localhost:8000/tasks
-curl -X PATCH http://localhost:8000/tasks/1/complete
-curl -X DELETE http://localhost:8000/tasks/1
-```
-
-Interactive docs: [http://localhost:8000/docs](http://localhost:8000/docs)
-
-### `GET /reports` query parameters
-
-| Param        | Type            | Default      | Notes                                            |
-| ------------ | --------------- | ------------ | ------------------------------------------------ |
-| `status`     | enum            | —            | One of `pending`, `approved`, `rejected`, `archived`. |
-| `date_from`  | datetime (ISO)  | —            | Lower bound on `created_at` (inclusive).         |
-| `date_to`    | datetime (ISO)  | —            | Upper bound on `created_at` (inclusive).         |
-| `sort`       | string          | `created_at` | One of `id`, `title`, `status`, `owner`, `amount`, `created_at`. |
-| `descending` | bool            | `true`       | Sort direction.                                  |
-| `offset`     | int (>=0)       | `0`          | Pagination offset.                               |
-| `limit`      | int (1..200)    | `20`         | Page size.                                       |
-
