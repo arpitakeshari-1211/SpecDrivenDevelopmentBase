@@ -7,10 +7,14 @@ A small FastAPI service that exposes a paginated `/reports` endpoint backed by a
 ```
 app/
 ├── __init__.py
-├── data.py        # Seed dataset (120 rows, deterministic)
-├── models.py      # Pydantic models — internal vs public
-├── reports.py     # Filter / sort / pagination query layer
-└── main.py        # FastAPI HTTP layer
+├── data.py          # Seed dataset (120 rows, deterministic)
+├── models.py        # Pydantic models — internal vs public
+├── reports.py       # Filter / sort / pagination query layer
+├── todo_models.py   # Task Pydantic models
+├── todo_store.py    # In-memory task storage
+├── todo_routes.py   # TODO JSON API (/tasks)
+├── todo_ui.py       # Simple HTML homepage (/)
+└── main.py          # FastAPI app (reports + todos)
 ```
 
 ## Requirements
@@ -36,7 +40,11 @@ pip install -e .
 uvicorn app.main:app --reload --port 8000
 ```
 
-Then hit it from another terminal:
+Then open the TODO UI in your browser:
+
+**http://localhost:8000/**
+
+Or hit the API from another terminal:
 
 ```bash
 curl "http://localhost:8000/health"
@@ -49,6 +57,26 @@ curl "http://localhost:8000/reports?limit=3" | python -m json.tool
 | ------ | ---------- | ------------------------------------------------------ |
 | GET    | `/health`  | Liveness probe — returns `{"status": "ok"}`.           |
 | GET    | `/reports` | Paginated list of reports with filtering and sorting.  |
+
+### TODO API (`/tasks`)
+
+In-memory todo list. Data is lost when the server restarts.
+
+| Method | Path                      | Description              |
+| ------ | ------------------------- | ------------------------ |
+| POST   | `/tasks`                  | Add a task (`{"title": "..."}`). |
+| GET    | `/tasks`                  | List all tasks.          |
+| DELETE | `/tasks/{task_id}`        | Delete a task by id.     |
+| PATCH  | `/tasks/{task_id}/complete` | Mark a task completed. |
+
+```bash
+curl -X POST http://localhost:8000/tasks -H "Content-Type: application/json" -d "{\"title\": \"Learn FastAPI\"}"
+curl http://localhost:8000/tasks
+curl -X PATCH http://localhost:8000/tasks/1/complete
+curl -X DELETE http://localhost:8000/tasks/1
+```
+
+Interactive docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ### `GET /reports` query parameters
 
