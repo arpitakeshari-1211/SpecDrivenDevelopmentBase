@@ -1,16 +1,20 @@
-# Reports API
+# SDD Workshop API
 
-A small FastAPI service that exposes a paginated `/reports` endpoint backed by a deterministic in-memory dataset.
+FastAPI project with a **Reports API** and a **TODO app** built from OpenSpec (`openspec/changes/todo-app/`).
 
 ## Layout
 
 ```
 app/
 ├── __init__.py
-├── data.py        # Seed dataset (120 rows, deterministic)
-├── models.py      # Pydantic models — internal vs public
-├── reports.py     # Filter / sort / pagination query layer
-└── main.py        # FastAPI HTTP layer
+├── data.py          # Reports seed dataset
+├── models.py        # Reports Pydantic models
+├── reports.py       # Reports query layer
+├── todo_models.py   # Task model (id, title, completed)
+├── todo_store.py    # In-memory task storage
+├── todo_routes.py   # TODO JSON API
+├── todo_ui.py       # TODO homepage (/)
+└── main.py          # FastAPI entrypoint
 ```
 
 ## Requirements
@@ -36,11 +40,17 @@ pip install -e .
 uvicorn app.main:app --reload --port 8000
 ```
 
-Then hit it from another terminal:
+Open the TODO UI: **http://localhost:8000/**
+
+Or use the API from another terminal:
 
 ```bash
 curl "http://localhost:8000/health"
-curl "http://localhost:8000/reports?limit=3" | python -m json.tool
+curl -X POST http://localhost:8000/tasks -H "Content-Type: application/json" -d "{\"title\": \"Learn OpenSpec\"}"
+curl http://localhost:8000/tasks
+curl -X PATCH http://localhost:8000/tasks/1/complete
+curl -X DELETE http://localhost:8000/tasks/1
+curl "http://localhost:8000/reports?limit=3"
 ```
 
 ## Endpoints
@@ -49,6 +59,18 @@ curl "http://localhost:8000/reports?limit=3" | python -m json.tool
 | ------ | ---------- | ------------------------------------------------------ |
 | GET    | `/health`  | Liveness probe — returns `{"status": "ok"}`.           |
 | GET    | `/reports` | Paginated list of reports with filtering and sorting.  |
+
+### TODO API (in-memory)
+
+| Method | Path | Description |
+| ------ | ---- | ----------- |
+| GET | `/` | Simple HTML UI |
+| POST | `/tasks` | Add task (`{"title": "..."}`) |
+| GET | `/tasks` | List all tasks |
+| PATCH | `/tasks/{id}/complete` | Mark task completed |
+| DELETE | `/tasks/{id}` | Delete task |
+
+API docs: http://localhost:8000/docs
 
 ### `GET /reports` query parameters
 

@@ -1,4 +1,4 @@
-"""FastAPI HTTP layer for the Reports app."""
+"""FastAPI app: Reports API + TODO app (OpenSpec: openspec/changes/todo-app/)."""
 
 from __future__ import annotations
 
@@ -8,8 +8,13 @@ from fastapi import FastAPI, HTTPException, Query
 
 from app.models import ReportListResponse, ReportPublic, ReportStatus
 from app.reports import query
+from app.todo_routes import router as todo_router
+from app.todo_ui import router as todo_ui_router
 
-app = FastAPI(title="SDD Workshop — Reports API", version="0.1.0")
+app = FastAPI(title="SDD Workshop API", version="0.1.0")
+
+app.include_router(todo_ui_router)
+app.include_router(todo_router)
 
 
 @app.get("/health")
